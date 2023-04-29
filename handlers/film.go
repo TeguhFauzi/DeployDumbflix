@@ -27,7 +27,7 @@ func HandlerFilm(FilmRepository repositories.FilmRepository) *handlerFilm {
 	return &handlerFilm{FilmRepository}
 }
 
-// var path_file = "http://localhost:5000/uploads/"
+var path_file = os.Getenv("PATH_FILE")
 func (h *handlerFilm) FindFilm(c echo.Context) error {
 	films, err := h.FilmRepository.FindFilms()
 	if err != nil {
@@ -93,6 +93,9 @@ func (h *handlerFilm) CreateFilm(c echo.Context) error {
 	if err != nil {
 		fmt.Println(err.Error())
 	}
+
+
+	
 	film := models.Film{
 		Title:         request.Title,
 		Thumbnailfilm: resp.SecureURL,
