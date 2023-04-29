@@ -13,6 +13,9 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/labstack/echo/v4"
+	"context"
+	"github.com/cloudinary/cloudinary-go/v2"
+	"github.com/cloudinary/cloudinary-go/v2/api/uploader"
 )
 
 type handlerProfile struct {
@@ -62,9 +65,24 @@ func (h *handlerProfile) CreateProfile(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, dto.ErrorResult{Status: http.StatusInternalServerError, Message: err.Error()})
 	}
 
+	var ctx = context.Background()
+	var CLOUD_NAME = os.Getenv("CLOUD_NAME")
+	var API_KEY = os.Getenv("API_KEY")
+	var API_SECRET = os.Getenv("API_SECRET")
+
+
+	// Add your Cloudinary credentials ...
+cld, _ := cloudinary.NewFromParams(CLOUD_NAME, API_KEY, API_SECRET)
+
+// Upload file to Cloudinary ...
+resp, err := cld.Upload.Upload(ctx, dataFile, uploader.UploadParams{Folder: "dumbflix"});
+if err != nil {
+	fmt.Println(err.Error())
+  }
+
 	profile := models.Profile{
 		ID:     request.ID,
-		Photo:  request.Photo,
+		Photo:  resp.SecureURL,
 		UserID: int(userId),
 	}
 
@@ -102,10 +120,29 @@ func (h *handlerProfile) UpdateProfile(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, dto.ErrorResult{Status: http.StatusBadRequest, Message: err.Error()})
 	}
 
+
+	var ctx = context.Background()
+	var CLOUD_NAME = os.Getenv("CLOUD_NAME")
+	var API_KEY = os.Getenv("API_KEY")
+	var API_SECRET = os.Getenv("API_SECRET")
+
+
+	// Add your Cloudinary credentials ...
+cld, _ := cloudinary.NewFromParams(CLOUD_NAME, API_KEY, API_SECRET)
+
+// Upload file to Cloudinary ...
+resp, err := cld.Upload.Upload(ctx, dataFile, uploader.UploadParams{Folder: "dumbflix"});
+
+
+if err != nil {
+	fmt.Println(err.Error())
+  }
+
+
 	user.ID = request.ID
 
 	if request.Photo != "" {
-		user.Photo = dataFile
+		user.Photo = resp.SecureURL
 	}
 
 	data, err := h.ProfileRepository.UpdateProfile(user)

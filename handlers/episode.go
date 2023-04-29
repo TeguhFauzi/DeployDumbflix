@@ -8,10 +8,13 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
-
+	"os"
 	"github.com/go-playground/validator/v10"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/labstack/echo/v4"
+	"context"
+	"github.com/cloudinary/cloudinary-go/v2"
+	"github.com/cloudinary/cloudinary-go/v2/api/uploader"
 )
 
 type handlerEpisode struct {
@@ -74,9 +77,28 @@ func (h *handlerEpisode) CreateEpisode(c echo.Context) error {
 			return c.JSON(http.StatusInternalServerError, dto.ErrorResult{Status: http.StatusInternalServerError, Message: err.Error()})
 		}
 
+		
+
+	var ctx = context.Background()
+	var CLOUD_NAME = os.Getenv("CLOUD_NAME")
+	var API_KEY = os.Getenv("API_KEY")
+	var API_SECRET = os.Getenv("API_SECRET")
+
+
+	// Add your Cloudinary credentials ...
+cld, _ := cloudinary.NewFromParams(CLOUD_NAME, API_KEY, API_SECRET)
+
+// Upload file to Cloudinary ...
+resp, err := cld.Upload.Upload(ctx, dataFile, uploader.UploadParams{Folder: "dumbflix"});
+
+
+if err != nil {
+	fmt.Println(err.Error())
+  }
+
 		episode := models.Episode{
 			Title:         request.Title,
-			Thumbnailfilm: request.Thumbnailfilm,
+			Thumbnailfilm: resp.SecureURL,
 			Linkfilm:      request.Linkfilm,
 			FilmID:        request.FilmID,
 		}
@@ -140,6 +162,21 @@ func (h *handlerEpisode) UpdateEpisode(c echo.Context) error {
 			return c.JSON(http.StatusInternalServerError, dto.ErrorResult{Status: http.StatusInternalServerError, Message: err.Error()})
 		}
 
+		var ctx = context.Background()
+		var CLOUD_NAME = os.Getenv("CLOUD_NAME")
+		var API_KEY = os.Getenv("API_KEY")
+		var API_SECRET = os.Getenv("API_SECRET")
+	
+	
+		// Add your Cloudinary credentials ...
+	cld, _ := cloudinary.NewFromParams(CLOUD_NAME, API_KEY, API_SECRET)
+	
+	// Upload file to Cloudinary ...
+	resp, err := cld.Upload.Upload(ctx, dataFile, uploader.UploadParams{Folder: "dumbflix"});
+	if err != nil {
+		fmt.Println(err.Error())
+	  }
+
 		episode, err := h.EpisodeRepository.GetEpisode(int(id))
 		if err != nil {
 			return c.JSON(http.StatusBadRequest, dto.ErrorResult{Status: http.StatusBadRequest, Message: err.Error()})
@@ -149,7 +186,7 @@ func (h *handlerEpisode) UpdateEpisode(c echo.Context) error {
 			episode.Title = request.Title
 		}
 		if request.Thumbnailfilm != "" {
-			episode.Thumbnailfilm = request.Thumbnailfilm
+			episode.Thumbnailfilm = resp.SecureURL
 		}
 		if request.Linkfilm != "" {
 			episode.Linkfilm = request.Linkfilm

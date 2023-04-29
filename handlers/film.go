@@ -11,6 +11,10 @@ import (
 	"net/http"
 	"strconv"
 
+	"context"
+
+	"github.com/cloudinary/cloudinary-go/v2"
+	"github.com/cloudinary/cloudinary-go/v2/api/uploader"
 	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
 )
@@ -22,12 +26,18 @@ type handlerFilm struct {
 func HandlerFilm(FilmRepository repositories.FilmRepository) *handlerFilm {
 	return &handlerFilm{FilmRepository}
 }
-var path_file = "http://localhost:5000/uploads/"
+
+// var path_file = "http://localhost:5000/uploads/"
 func (h *handlerFilm) FindFilm(c echo.Context) error {
 	films, err := h.FilmRepository.FindFilms()
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, dto.ErrorResult{Status: http.StatusBadRequest, Message: err.Error()})
 	}
+
+	for i, p := range films {
+		films[i].Thumbnailfilm = p.Thumbnailfilm
+	}
+
 	return c.JSON(http.StatusOK, dto.SuccessResult{Status: http.StatusOK, Message: "Film successfully obtained", Data: films})
 }
 
@@ -51,24 +61,16 @@ func (h *handlerFilm) CreateFilm(c echo.Context) error {
 	dataFile := c.Get("dataFile").(string)
 	fmt.Println("this is data file", dataFile)
 
-	// userLogin := c.Get("userLogin")
-	// userId := userLogin.(jwt.MapClaims)["id"].(float64)
+	category_id, _ := strconv.Atoi(c.FormValue("category_id"))
+	year, _ := strconv.Atoi(c.FormValue("year"))
 
-	// category_id, _ := strconv.Atoi(c.FormValue("category_id"))
-	// year, _ := strconv.Atoi(c.FormValue("year"))
-
-	// request := filmdto.FilmRequest{
-	// 	Title:         c.FormValue("title"),
-	// 	Year:          year,
-	// 	CategoryID:    category_id,
-	// 	Description:   c.FormValue("description"),
-	// 	Thumbnailfilm: dataFile,
-	// 	LinkFilm:      c.FormValue("linkfilm"),
-	// }
-
-	request := new(filmdto.FilmRequest)
-	if err := c.Bind(request); err != nil {
-		return c.JSON(http.StatusBadRequest, dto.ErrorResult{Status: http.StatusBadRequest, Message: err.Error()})
+	request := filmdto.FilmRequest{
+		Title:         c.FormValue("title"),
+		Year:          year,
+		CategoryID:    category_id,
+		Description:   c.FormValue("description"),
+		Thumbnailfilm: dataFile,
+		LinkFilm:      c.FormValue("linkfilm"),
 	}
 
 	validation := validator.New()
@@ -77,14 +79,27 @@ func (h *handlerFilm) CreateFilm(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, dto.ErrorResult{Status: http.StatusInternalServerError, Message: err.Error()})
 	}
 
+	var ctx = context.Background()
+	var CLOUD_NAME = os.Getenv("CLOUD_NAME")
+	var API_KEY = os.Getenv("API_KEY")
+	var API_SECRET = os.Getenv("API_SECRET")
+
+	// Add your Cloudinary credentials ...
+	cld, _ := cloudinary.NewFromParams(CLOUD_NAME, API_KEY, API_SECRET)
+
+	// Upload file to Cloudinary ...
+	resp, err := cld.Upload.Upload(ctx, dataFile, uploader.UploadParams{Folder: "dumbflix"})
+
+	if err != nil {
+		fmt.Println(err.Error())
+	}
 	film := models.Film{
 		Title:         request.Title,
-		Thumbnailfilm: dataFile,
+		Thumbnailfilm: resp.SecureURL,
 		Year:          request.Year,
-
-		CategoryID:  request.CategoryID,
-		LinkFilm:    request.LinkFilm,
-		Description: request.Description,
+		CategoryID:    request.CategoryID,
+		LinkFilm:      request.LinkFilm,
+		Description:   request.Description,
 	}
 
 	film, err = h.FilmRepository.CreateFilm(film)
@@ -123,6 +138,19 @@ func (h *handlerFilm) UpdateFilm(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, dto.ErrorResult{Status: http.StatusInternalServerError, Message: err.Error()})
 	}
 
+	var ctx = context.Background()
+	var CLOUD_NAME = os.Getenv("CLOUD_NAME")
+	var API_KEY = os.Getenv("API_KEY")
+	var API_SECRET = os.Getenv("API_SECRET")
+
+	// Add your Cloudinary credentials ...
+	cld, _ := cloudinary.NewFromParams(CLOUD_NAME, API_KEY, API_SECRET)
+
+	// Upload file to Cloudinary ...
+	resp, err := cld.Upload.Upload(ctx, dataFile, uploader.UploadParams{Folder: "dumbflix"})
+	if err != nil {
+		fmt.Println(err.Error())
+	}
 	film, _ := h.FilmRepository.GetFilm(id)
 	// film.ID = request.ID
 
@@ -130,7 +158,7 @@ func (h *handlerFilm) UpdateFilm(c echo.Context) error {
 		film.Title = request.Title
 	}
 	if request.Thumbnailfilm != "" {
-		film.Thumbnailfilm = request.Thumbnailfilm
+		film.Thumbnailfilm = resp.SecureURL
 	}
 	if request.Year != 0 {
 		film.Year = request.Year
