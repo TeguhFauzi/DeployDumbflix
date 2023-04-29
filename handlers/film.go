@@ -33,11 +33,6 @@ func (h *handlerFilm) FindFilm(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, dto.ErrorResult{Status: http.StatusBadRequest, Message: err.Error()})
 	}
 
-	for i, p := range films {
-		imagePath := os.Getenv("PATH_FILE") + p.Thumbnailfilm
-		films[i].Thumbnailfilm = imagePath
-	}
-
 	return c.JSON(http.StatusOK, dto.SuccessResult{Status: http.StatusOK, Message: "Film successfully obtained", Data: films})
 }
 
@@ -51,9 +46,6 @@ func (h *handlerFilm) GetFilm(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, dto.ErrorResult{Status: http.StatusBadRequest, Message: err.Error()})
 	}
-
-	films.Thumbnailfilm = os.Getenv("PATH_FILE") + films.Thumbnailfilm
-
 	return c.JSON(http.StatusOK, dto.SuccessResult{Status: http.StatusOK, Message: "Profile data successfully obtained", Data: convertResponseFilm(films)})
 }
 
@@ -73,12 +65,6 @@ func (h *handlerFilm) CreateFilm(c echo.Context) error {
 		LinkFilm:      c.FormValue("linkfilm"),
 	}
 
-	validation := validator.New()
-	err := validation.Struct(request)
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, dto.ErrorResult{Status: http.StatusInternalServerError, Message: err.Error()})
-	}
-
 	var ctx = context.Background()
 	var CLOUD_NAME = os.Getenv("CLOUD_NAME")
 	var API_KEY = os.Getenv("API_KEY")
@@ -89,9 +75,14 @@ func (h *handlerFilm) CreateFilm(c echo.Context) error {
 
 	// Upload file to Cloudinary ...
 	resp, err := cld.Upload.Upload(ctx, dataFile, uploader.UploadParams{Folder: "dumbflix"})
-
 	if err != nil {
 		fmt.Println(err.Error())
+	}
+
+	validation := validator.New()
+	err = validation.Struct(request)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, dto.ErrorResult{Status: http.StatusInternalServerError, Message: err.Error()})
 	}
 
 	film := models.Film{
@@ -131,12 +122,6 @@ func (h *handlerFilm) UpdateFilm(c echo.Context) error {
 		LinkFilm:      c.FormValue("linkfilm"),
 	}
 
-	validation := validator.New()
-	err := validation.Struct(request)
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, dto.ErrorResult{Status: http.StatusInternalServerError, Message: err.Error()})
-	}
-
 	var ctx = context.Background()
 	var CLOUD_NAME = os.Getenv("CLOUD_NAME")
 	var API_KEY = os.Getenv("API_KEY")
@@ -150,6 +135,14 @@ func (h *handlerFilm) UpdateFilm(c echo.Context) error {
 	if err != nil {
 		fmt.Println(err.Error())
 	}
+
+	validation := validator.New()
+	err = validation.Struct(request)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, dto.ErrorResult{Status: http.StatusInternalServerError, Message: err.Error()})
+	}
+
+	
 	film, _ := h.FilmRepository.GetFilm(id)
 	// film.ID = request.ID
 
