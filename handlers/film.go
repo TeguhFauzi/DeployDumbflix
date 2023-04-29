@@ -27,17 +27,12 @@ func HandlerFilm(FilmRepository repositories.FilmRepository) *handlerFilm {
 	return &handlerFilm{FilmRepository}
 }
 
-var path_file = os.Getenv("PATH_FILE")
+
 func (h *handlerFilm) FindFilm(c echo.Context) error {
 	films, err := h.FilmRepository.FindFilms()
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, dto.ErrorResult{Status: http.StatusBadRequest, Message: err.Error()})
 	}
-
-	for i, p := range films {
-		films[i].Thumbnailfilm = p.Thumbnailfilm
-	}
-
 	return c.JSON(http.StatusOK, dto.SuccessResult{Status: http.StatusOK, Message: "Film successfully obtained", Data: films})
 }
 
@@ -51,8 +46,6 @@ func (h *handlerFilm) GetFilm(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, dto.ErrorResult{Status: http.StatusBadRequest, Message: err.Error()})
 	}
-
-	films.Thumbnailfilm = os.Getenv("PATH_FILE") + films.Thumbnailfilm
 
 	return c.JSON(http.StatusOK, dto.SuccessResult{Status: http.StatusOK, Message: "Profile data successfully obtained", Data: convertResponseFilm(films)})
 }
