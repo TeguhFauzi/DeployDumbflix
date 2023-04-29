@@ -115,9 +115,7 @@ func (h *handlerFilm) CreateFilm(c echo.Context) error {
 func (h *handlerFilm) UpdateFilm(c echo.Context) error {
 	dataFile := c.Get("dataFile").(string)
 	fmt.Println("this is data file", dataFile)
-
-	// userLogin := c.Get("userLogin")
-	// userId := userLogin.(jwt.MapClaims)["id"].(float64)
+	
 	id, _ := strconv.Atoi(c.Param("id"))
 
 	year, _ := strconv.Atoi(c.FormValue("Year"))
@@ -170,47 +168,27 @@ func (h *handlerFilm) UpdateFilm(c echo.Context) error {
 		film.Description = request.Description
 	}
 
-	// dataCategory, _ := h.FilmRepository.GetCategoryFilm(film.CategoryID)
-
 	data, err := h.FilmRepository.UpdateFilm(film)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, dto.ErrorResult{Status: http.StatusInternalServerError, Message: err.Error()})
 	}
 
-	// data.Category = dataCategory
 	return c.JSON(http.StatusOK, dto.SuccessResult{Status: http.StatusOK, Message: "Profile data updated successfully", Data: convertResponseFilm(data)})
 }
 
 func (h *handlerFilm) DeleteFilm(c echo.Context) error {
-	// userLogin := c.Get("userLogin")
-	// userId := userLogin.(jwt.MapClaims)["id"].(float64)
+
 	id, _ := strconv.Atoi(c.Param("id"))
-	// film, err := h.FilmRepository.GetFilm(int(userId))
-	// if err != nil {
-	// 	return c.JSON(http.StatusBadRequest, dto.ErrorResult{Status: http.StatusBadRequest, Message: err.Error()})
-	// }
+
 	film, err := h.FilmRepository.GetFilm(id)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, dto.ErrorResult{Status: http.StatusBadRequest, Message: err.Error()})
 	}
 
-	// fileName := film.Thumbnailfilm
-	// dirPath := "uploads"
-
-	// filePath := fmt.Sprintf("%s/%s", dirPath, fileName)
-
 	data, err := h.FilmRepository.DeleteFilm(film, id)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, dto.ErrorResult{Status: http.StatusInternalServerError, Message: err.Error()})
 	}
-
-	// err = os.Remove(filePath)
-	// if err != nil {
-	// 	fmt.Println("Failed to delete file"+fileName+":", err)
-	// 	return c.JSON(http.StatusInternalServerError, dto.ErrorResult{Status: http.StatusInternalServerError, Message: err.Error()})
-	// }
-
-	// fmt.Println("File " + fileName + " deleted successfully")
 
 	return c.JSON(http.StatusOK, dto.SuccessResult{Status: http.StatusOK, Message: "Profile data deleted successfully", Data: convertResponseFilm(data)})
 }

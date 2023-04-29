@@ -31,6 +31,12 @@ func (h *handlerProfile) FindProfiles(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, dto.ErrorResult{Status: http.StatusBadRequest, Message: err.Error()})
 	}
+
+
+	for i, p := range profile {
+		profile[i].Photo = p.Photo
+	}
+
 	return c.JSON(http.StatusOK, dto.SuccessResult{Status: http.StatusOK, Message: "Profile data successfully obtained", Data: profile})
 }
 
@@ -43,7 +49,7 @@ func (h *handlerProfile) GetProfile(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, dto.ErrorResult{Status: http.StatusBadRequest, Message: err.Error()})
 	}
-
+	profile.Photo = os.Getenv("PATH_FILE") + profile.Photo
 	return c.JSON(http.StatusOK, dto.SuccessResult{Status: http.StatusOK, Message: "Profile data successfully obtained", Data: convertResponseProfile(profile)})
 }
 

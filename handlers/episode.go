@@ -31,6 +31,10 @@ func (h *handlerEpisode) FindEpisodes(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, dto.ErrorResult{Status: http.StatusBadRequest, Message: err.Error()})
 	}
 
+	for i, p := range episodes {
+		episodes[i].Thumbnailfilm = p.Thumbnailfilm
+	}
+
 	return c.JSON(http.StatusOK, dto.SuccessResult{Status: http.StatusOK, Data: episodes})
 }
 
@@ -51,7 +55,7 @@ func (h *handlerEpisode) GetEpisode(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, dto.ErrorResult{Status: http.StatusBadRequest, Message: err.Error()})
 	}
-
+	episode.Thumbnailfilm = os.Getenv("PATH_FILE") + episode.Thumbnailfilm
 	return c.JSON(http.StatusOK, dto.SuccessResult{Status: http.StatusOK, Message: "Episode successfully obtained", Data: convertResponseEpisode(episode)})
 }
 
