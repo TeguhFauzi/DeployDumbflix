@@ -114,18 +114,6 @@ func (h *handlerProfile) UpdateProfile(c echo.Context) error {
 		Photo: dataFile,
 	}
 
-	validation := validator.New()
-	err := validation.Struct(request)
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, dto.ErrorResult{Status: http.StatusInternalServerError, Message: err.Error()})
-	}
-
-	user, err := h.ProfileRepository.GetProfile(int(userId))
-
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, dto.ErrorResult{Status: http.StatusBadRequest, Message: err.Error()})
-	}
-
 
 	var ctx = context.Background()
 	var CLOUD_NAME = os.Getenv("CLOUD_NAME")
@@ -144,8 +132,20 @@ if err != nil {
 	fmt.Println(err.Error())
   }
 
+	validation := validator.New()
+	err = validation.Struct(request)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, dto.ErrorResult{Status: http.StatusInternalServerError, Message: err.Error()})
+	}
 
-	user.ID = request.ID
+	user, err := h.ProfileRepository.GetProfile(int(userId))
+
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, dto.ErrorResult{Status: http.StatusBadRequest, Message: err.Error()})
+	}
+
+
+	// user.ID = request.ID
 
 	if request.Photo != "" {
 		user.Photo = resp.SecureURL
