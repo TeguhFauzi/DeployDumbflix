@@ -110,7 +110,7 @@ func (h *handlerFilm) UpdateFilm(c echo.Context) error {
 
 	id, _ := strconv.Atoi(c.Param("id"))
 
-	year, _ := strconv.Atoi(c.FormValue("Year"))
+	year, _ := strconv.Atoi(c.FormValue("year"))
 	category_id, _ := strconv.Atoi(c.FormValue("Category_id"))
 
 	request := filmdto.FilmRequest{
