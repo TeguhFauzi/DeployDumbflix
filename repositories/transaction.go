@@ -54,11 +54,7 @@ func (r *repository) UpdateTransaction(status string, ID int) (models.Transactio
 		r.db.Save(&user)
 	}
 
-	var transactionData models.Transaction
-	r.db.First(&transactionData, ID)
 	transaction.Status = status
-
-	err := r.db.Save(&transactionData).Error
-
+	err := r.db.Save(&transaction).Error
 	return transaction, err
 }
