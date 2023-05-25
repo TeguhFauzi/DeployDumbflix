@@ -1,0 +1,103 @@
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap");
+
+* {
+  font-family: "Poppins", sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: #1F1F1F;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Dark Mode CSS */
+.dark-mode {
+  background-color: #181622!important;
+  color: #fff!important;
+}
+
+.my-modal-color {
+  background-color: #1F1F1F; /* ganti dengan warna yang diinginkan */
+}
+
+
+.selective{
+  margin-top: 100px!important;
+}
+
+div .d-flex.mx-5 select{
+  margin:0 30px;
+}
+
+
+.buttonAdd{
+  background-color: rgb(229, 9, 20);
+  border: none;
+  border-radius: 4px;
+  color: white;
+  padding: 0 20px;
+  text-decoration: none;
+}
+
+#wrap{
+  display: flex;
+  flex-wrap: wrap;
+}
+
+element.style {
+}
+.rounded {
+    border-radius: var(--bs-border-radius)!important;
+}
+.w-100 {
+    width: 100%!important;
+}
+.d-block {
+    display: block!important;
+}
+img, svg {
+    vertical-align: middle;
+}
+*, ::after, ::before {
+    box-sizing: border-box;
+}
+* {
+    font-family: "Poppins", sans-serif;
+    margin: 0;
+    padding: 0;
+}
+user agent stylesheet
+img {
+    overflow-clip-margin: content-box;
+    overflow: clip;
+}
+.swiper, swiper-container {
+    margin-left: auto;
+    margin-right: auto;
+    position: relative;
+    overflow: hidden;
+    list-style: none;
+    padding: 0;
+    z-index: 0!important;
+    display: block;
+}
+#sub{
+  background-color: rgb(229, 9, 20)!important;
+  border: none;
+}
+.my-btn {
+  position: relative;
+  transform: translateY(-30px);
+}
+a{
+  text-decoration: none!important;
+}
+div .navbar-nav img{
+  margin-left: 0px!important;
+}
+div.navbar-collapse.collapse{
+  display: flex;
+  justify-content: space-between;
+}
